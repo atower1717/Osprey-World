@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Osprey World</title>
@@ -40,7 +41,7 @@
 </style>
 </head>
 <body>
-<div id="stage"><div id="imgwrap"><canvas id="c" width="2512" height="2512" style="width: 1256px; height: 1256px;"></canvas><button id="again">Experience Again</button><div id="dlbox2">Download</div></div></div>
+<div id="stage"><div id="imgwrap"><canvas id="c"></canvas><button id="again">Experience Again</button><div id="dlbox2">Download</div></div></div>
 <audio id="didj" preload="auto"></audio>
 <audio id="wind" preload="auto"></audio>
 <audio id="glass" preload="auto"></audio>
@@ -549,16 +550,16 @@ function showAgain(){ running=false; again.classList.add('show'); try{var d=docu
 enter.addEventListener('click',begin);
 again.addEventListener('click',begin);
 
-// DOWNLOAD box: saves this page's own HTML, then hides once clicked. The box shows fresh on
-// every load (so each new iteration has it); clicking it downloads and removes BOTH boxes for
-// the life of this page. We intentionally do NOT persist across different builds, so a new
-// iteration always presents the box again. (When you host the FINAL piece publicly and want the
-// box gone forever after one download, that single-file persistence can be re-enabled.)
+// DOWNLOAD box: saves this page's own HTML, then hides permanently after one download. On the
+// hosted public piece (GitHub Pages), localStorage persists, so once a visitor downloads, the
+// box stays gone on every future visit. Clicking must not start the piece (stopPropagation).
 (function(){
   var dl=document.getElementById('dlbox');
   var dl2=document.getElementById('dlbox2');
   var clicked=false;
   function hideAll(){ clicked=true; if(dl) dl.classList.add('hidden'); if(dl2) dl2.classList.add('hidden'); }
+  // if previously downloaded, hide permanently
+  try{ if(localStorage.getItem('osprey_downloaded')==='1'){ hideAll(); } }catch(e){}
   function doDownload(ev){
     if(ev) ev.stopPropagation();
     try{
@@ -570,7 +571,8 @@ again.addEventListener('click',begin);
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){URL.revokeObjectURL(url);}, 1000);
     }catch(e){}
-    hideAll();   // both boxes gone for the life of this page
+    try{ localStorage.setItem('osprey_downloaded','1'); }catch(e){}
+    hideAll();   // both boxes gone (permanently - persists across visits when hosted)
   }
   if(dl) dl.addEventListener('click', doDownload);
   if(dl2) dl2.addEventListener('click', doDownload);
@@ -580,5 +582,5 @@ again.addEventListener('click',begin);
   };
 })();
 </script>
-
-</body></html>
+</body>
+</html>
